@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 from functools import wraps
 
 from dotenv import load_dotenv
@@ -12,7 +12,6 @@ from logger import logger
 import utils
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-print(base_dir)
 env_path = os.path.join(base_dir, '.env')
 
 load_dotenv(env_path)
@@ -25,6 +24,7 @@ if not secret_key:
   raise RuntimeError("SECRET_KEY is not configured.")
 
 app.secret_key = secret_key
+app.permanent_session_lifetime = timedelta(days=3)
 
 def get_manager():
   if "manager" not in g:
@@ -62,7 +62,7 @@ def login():
     valid_inputs = utils.validate_authentication_input(email, password)
 
     if not valid_inputs['success']:
-      return render_template("authentication/login.html", message=valid_inputs['message'])
+      return render_template("authentication/login.html", message=valid_inputs['message'], form_data={})
 
     user = manager_obj.get_user(email)
 
@@ -71,14 +71,15 @@ def login():
     if not valid['success']:
       logger.warning(f"LOGIN_FAILED | REASON={valid['log_message']}")
 
-      return render_template("authentication/login.html", message=valid['message'])     
+      return render_template("authentication/login.html", message=valid['message'], form_data=request.form)     
 
     session['user_id'] = user['user_id']
+    session.permanent = True
 
     flash("Login successfully!", "success")
     return redirect(url_for("home"))
 
-  return render_template("authentication/login.html")
+  return render_template("authentication/login.html", form_data={})
 
 @app.route("/signup", methods=["GET", "POST"])
 def create_user():
@@ -92,14 +93,14 @@ def create_user():
     valid_inputs = utils.validate_authentication_input(email, password)
 
     if not valid_inputs['success']:
-      return render_template("authentication/signup.html", message=valid_inputs['message'])
+      return render_template("authentication/signup.html", message=valid_inputs['message'], form_data={})
   
     valid = manager_obj.validation.can_signup(email, password, confirm_password)
 
     if not valid['success']:
       logger.warning(f"SIGNUP_FAILED | REASON={valid['log_message']}")
-      
-      return render_template("authentication/signup.html", message=valid['message'])
+
+      return render_template("authentication/signup.html", message=valid['message'], form_data=request.form)
 
     hashed_password = generate_password_hash(password)
   
@@ -110,7 +111,7 @@ def create_user():
     flash("Signup success. Please login to your account to get started.", "success")
     return redirect(url_for("login"))
 
-  return render_template("authentication/signup.html")
+  return render_template("authentication/signup.html", form_data={})
 
 @app.route("/logout")
 def logout():
@@ -169,7 +170,7 @@ def rent_house():
   
   if request.method == "POST":
     house_id = request.form.get('house_id', "").strip()          
-    renter_name = request.form.get('renter_name', "").strip().upper()       
+    renter_name = request.form.get('renter_name', "").strip().upper()
     contact_num = request.form.get('contact_num', "").strip()
     rental_duration = request.form.get('rent_duration', "").strip()
 
