@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Apply for Landlord</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <style>
+      .box {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>Apply for Landlord</h2>
+      <nav>
+        <a href="{{ url_for('home') }}">Home</a> | 
+        <a href="{{ url_for('houses') }}">Houses</a> |
+        <a href="{{ url_for('rent_house') }}">Rent House</a> |
+        <a href="{{ url_for('add_house') }}">Add House</a> |
+        <a href="{{ url_for('rental_history') }}">Rental History</a> |
+        <a href="{{ url_for('update_house') }}">Update House</a> |
+        <a href="{{ url_for('apply_for_landlord') }}">Landlord Registration</a>
+      </nav>
+    </header>
+    <main class="box">
+      <h2>Become a landlord</h2>
+      <p>Want to list your property on LoocRent?</p>
+      <p><strong>Sorry, this feature isn't available yet.</strong></p>
+      <p>Landlord registration and verification are planned for a future version of LoocRent</p> 
+    </main>
+  </body>
+</html>

@@ -16,6 +16,22 @@ class Database:
     self.create_house_table()
     self.create_rental_table()
 
+  def assign_landlord(self, user_id):
+    self.cursor.execute("""
+    UPDATE Users SET role = ?
+    WHERE user_id = ?;
+    """, ("LANDLORD", user_id))
+
+    self.conn.commit()
+
+    self.cursor.execute("""
+    SELECT user_id, role
+    FROM Users
+    WHERE user_id = ?;
+    """, (user_id,))
+
+    updated_user = self.cursor.fetchone()
+
   def close(self):
     self.conn.close()
 
@@ -24,7 +40,8 @@ class Database:
     CREATE TABLE IF NOT EXISTS Users (
     user_id INTEGER PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT "TENANT"
     );
     """)
 
@@ -53,6 +70,7 @@ class Database:
     CREATE TABLE IF NOT EXISTS Rentals (
     rental_id INTEGER PRIMARY KEY,
     house_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     renter_name TEXT NOT NULL,
     contact_num TEXT NOT NULL,
     date_rented TEXT NOT NULL,
@@ -63,6 +81,9 @@ class Database:
     
     FOREIGN KEY (house_id)
     REFERENCES Houses(house_id)
+
+    FOREIGN KEY (user_id)
+    REFERENCES Users(user_id)
     );
     """)
 
@@ -87,11 +108,11 @@ class Database:
     
     return cursor.lastrowid
 
-  def insert_rental(self, house_id, renter_name, contact_num, date_rented, duration_months):
+  def insert_rental(self, house_id, user_id, renter_name, contact_num, date_rented, duration_months):
     self.cursor.execute("""
-    INSERT INTO Rentals (house_id, renter_name, contact_num, date_rented, duration_months)
-    VALUES (?, ?, ?, ?, ?);
-    """, (house_id, renter_name, contact_num, date_rented, duration_months))
+    INSERT INTO Rentals (house_id, user_id, renter_name, contact_num, date_rented, duration_months)
+    VALUES (?, ?, ?, ?, ?, ?);
+    """, (house_id, user_id, renter_name, contact_num, date_rented, duration_months))
 
     self.conn.commit()
 
@@ -102,6 +123,32 @@ class Database:
     """, (email,))
 
     return self.cursor.fetchone()
+
+  def get_user_by_id(self, user_id):
+    self.cursor.execute("""
+    SELECT user_id FROM Rentals
+    WHERE user_id = ?;
+    """, (user_id,))
+
+    row = self.cursor.fetchone()
+
+    if row is None:
+      return None
+
+    return row['user_id']
+
+  def get_role(self, user_id):
+    self.cursor.execute("""
+    SELECT role FROM Users
+    WHERE user_id = ?;
+    """, (user_id,))
+
+    row = self.cursor.fetchone()
+
+    if row is None:
+      return None
+
+    return row['role']
 
   def show_houses(self):
     self.cursor.execute("""
@@ -146,17 +193,19 @@ class Database:
     if max_monthly_rent is not None:
       query += " AND monthly_rent <= ?"
       params.append(max_monthly_rent)
+      
     query += " ORDER BY house_id ASC;"
       
     self.cursor.execute(query, params)
     
     return self.cursor.fetchall()
 
-  def show_rentals(self):
+  def show_rentals(self, user_id):
     self.cursor.execute("""
     SELECT * FROM Rentals
+    WHERE user_id = ?
     ORDER BY rental_id ASC;
-    """)
+    """, (user_id,))
 
     return self.cursor.fetchall()
     

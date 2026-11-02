@@ -1,9 +1,6 @@
 from werkzeug.security import check_password_hash
 from email_validator import validate_email, EmailNotValidError
 
-from database import Database
-import utils
-
 def return_message(success, message, log_message):
   return {
     "success": success,
@@ -21,16 +18,24 @@ class Manager:
 
     return user
 
+  def get_role_by_user_id(self, user_id):
+    usr_role = self.db.get_role(user_id)
+
+    return usr_role
+
+  def register_landlord(self, user_id):
+    self.db.assign_landlord(user_id)
+
   def signup_user(self, email, password):
     self.db.create_user(email, password)
     
   def add_house(self, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added):
     return self.db.insert_house(owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added)
   
-  def add_rent(self, house_id, renter_name, contact_num, date_rented, rental_duration):
+  def add_rent(self, house_id, user_id, renter_name, contact_num, date_rented, rental_duration):
     self.db.rent_house_status(house_id)
     
-    self.db.insert_rental(house_id, renter_name, contact_num, date_rented, rental_duration)
+    self.db.insert_rental(house_id, user_id, renter_name, contact_num, date_rented, rental_duration)
   
   def close_rental(self, rental_id, closed_date, action, cancel_reason):
     rental = self.db.get_rental_by_id(rental_id)
@@ -50,8 +55,8 @@ class Manager:
   def get_rental(self, rental_id):
     return self.db.get_rental_by_id(rental_id)
 
-  def get_rentals(self):
-    return self.db.show_rentals()
+  def get_rentals(self, user_id):
+    return self.db.show_rentals(user_id)
 
   def get_house(self, house_id):
     return self.db.show_house(house_id)
@@ -126,7 +131,7 @@ class Validation:
     
     return return_message(True, "", "")
     
-  def can_close_rental(self, rental_id):
+  def can_close_rental(self, rental_id, user_id):
     rented = self.db.get_rental_by_id(rental_id)
     
     if rented is None:
@@ -134,6 +139,11 @@ class Validation:
     
     if rented["status"] != "ACTIVE":
       return return_message(False, "Rental is already closed.", "HOUSE_NOT_ACTIVE")
+
+    user_id = self.db.get_user_by_id(user_id)
+
+    if user_id is None:
+      return return_message(False, "You haven't rented a house yet.", "USER_NOT_RENTED_A_HOUSE")
       
     return return_message(True, "", "")
     

@@ -7,19 +7,6 @@
     <title>Available Houses</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
-    <style>
-      .post {
-        background-color: white;
-        padding: 20px;
-        border: solid 1px #ddd;
-        margin-top: 20px;
-        margin-bottom: 20px;
-      }
-
-      .post h4 {
-        margin-top: 0;
-      }
-    </style>
   </head>
   <body>
     <header>
@@ -43,22 +30,22 @@
       <form method="POST" action="{{ url_for('search_house') }}">
         <fieldset>
           <legend><h4>Search House</h4></legend>
-          <label for="location">Location</label>
+          <label for="location">Location (optional)</label>
           <input type="text" id="location" name="location" placeholder="Enter location">
-          <label for="house_type">House Type</label>
+          <label for="house_type">House Type (optional)</label>
           <input type="text" id="house_type" name="house_type" placeholder="Enter house type">
-          <label for="min_bedrooms">Minimum Bedrooms</label>
+          <label for="min_bedrooms">Minimum Bedrooms (optional)</label>
           <input type="number" id="min_bedrooms" name="min_bedrooms" placeholder="Enter minimum bedrooms">
-          <label for="min_bathrooms">Minimum Bathrooms</label>
+          <label for="min_bathrooms">Minimum Bathrooms (optional)</label>
           <input type="number" id="min_bathrooms" name="min_bathrooms" placeholder="Enter minimum bathrooms">
-          <label for="max_monthly_rent">Maximum Monthly Rent</label>
+          <label for="max_monthly_rent">Maximum Monthly Rent (optional)</label>
           <input type="number" id="max_monthly_rent" name="max_monthly_rent" placeholder="Enter maximum monthly rent" step="0.01">
         </fieldset>
         <button type="submit">Search House</button>
       </form>
       <section>
+        {% if houses %}
         <article class="post">
-
           {% for house in houses %}
             <h4>{{ house['house_name'] }}</h4>
             <details>
@@ -73,11 +60,14 @@
                 <p>House Type: {{ house['house_type'] }}</p>
                 <p>Date Added: {{ house['date_added'] }}</p>
                 <p>Status: {{ house['availability'] }}</p>
-                <button type="submit">Rent House</button>
+                <a href="{{ url_for('rent_house') }}" class="btn">Rent House</a>
               </div>
             </details>
           {% endfor %}
         </article>
+        {% else %}
+          <p>No House Found.</p>
+        {% endif %}
       </section>
     </main>
   </body>

@@ -33,23 +33,43 @@ def get_manager():
 
   return g.manager
 
-def login_required(view):
-  @wraps(view)
-  def wrapped_view(**kwargs):
-    if "user_id" not in session:
-      flash("Please login first.", "warning")
-      return redirect(url_for("login"))
-
-    return view(**kwargs)
-
-  return wrapped_view
-
 @app.teardown_appcontext
 def close_manager_db(exception=None):
   manager_obj = g.pop("manager", None)
 
   if manager_obj is not None:
     manager_obj.db.close()
+
+def login_required(view):
+  @wraps(view)
+  def wrapped_view(*args, **kwargs):
+    if "user_id" not in session:
+      flash("Please login first.", "warning")
+      return redirect(url_for("login"))
+
+    return view(*args, **kwargs)
+
+  return wrapped_view
+
+def role_required(role):
+  def decorator(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+      manager_obj = get_manager()
+
+      user_id = session['user_id']
+    
+      user_role = manager_obj.get_role_by_user_id(user_id)
+      
+      if role != user_role:
+        flash("You cannot access this feature yet. Register for Landlord.", "warning")
+        return redirect(url_for("home"))
+  
+      return view(*args, **kwargs)
+  
+    return wrapped_view
+
+  return decorator
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -71,10 +91,14 @@ def login():
     if not valid['success']:
       logger.warning(f"LOGIN_FAILED | REASON={valid['log_message']}")
 
-      return render_template("authentication/login.html", message=valid['message'], form_data=request.form)     
+      return render_template("authentication/login.html", message=valid['message'], form_data=request.form)
 
-    session['user_id'] = user['user_id']
+    usr_id = user['user_id']
+
+    session['user_id'] = usr_id
     session.permanent = True
+    
+    manager_obj.register_landlord(usr_id)
 
     flash("Login successfully!", "success")
     return redirect(url_for("home"))
@@ -119,12 +143,17 @@ def logout():
 
   return redirect(url_for("login"))
 
+@app.route("/apply-for-landlord")
+def apply_for_landlord():
+  return render_template("features/landlord_registration.html")
+
 @app.route("/")
 def home():
   return render_template("index.html")
 
 @app.route("/add-house", methods=["GET", "POST"])
 @login_required
+@role_required("LANDLORD")
 def add_house():
   manager_obj = get_manager()
   
@@ -189,8 +218,10 @@ def rent_house():
     if not valid['success']:
       logger.warning(f"RENT_HOUSE_FAILED | REASON={valid['log_message']}")
       return render_template("features/rent_house.html", form_data=request.form, message=f"{valid['message']}")
-        
-    manager_obj.add_rent(house_id, renter_name, contact_num, date_rented, rental_duration)
+
+    user_id = session['user_id']
+    
+    manager_obj.add_rent(house_id, user_id, renter_name, contact_num, date_rented, rental_duration)
         
     logger.info("RENT_HOUSE_SUCCESS")
 
@@ -203,8 +234,10 @@ def rent_house():
 @login_required
 def rental_history():
   manager_obj = get_manager()
+
+  user_id = session['user_id']
   
-  rentals = manager_obj.get_rentals()
+  rentals = manager_obj.get_rentals(user_id)
 
   form_data = session.pop("form_data", {})
   
@@ -224,8 +257,10 @@ def return_rental():
 
   rental_id = int(rental_id)
   closed_date = date.today().isoformat()
-          
-  valid = manager_obj.validation.can_close_rental(rental_id)
+
+  user_id = session['user_id']
+  
+  valid = manager_obj.validation.can_close_rental(rental_id, user_id)
         
   if not valid['success']:
     logger.warning(f"RETURN_HOUSE_FAILED | REASON={valid['log_message']}")
@@ -264,8 +299,10 @@ def cancel_rental():
     flash("Cancellation reason is required.", "warning")
     session["form_data"] = request.form.to_dict()
     return redirect(url_for("rental_history"))
+
+  user_id = session['user_id']
           
-  valid = manager_obj.validation.can_close_rental(rental_id)
+  valid = manager_obj.validation.can_close_rental(rental_id, user_id)
         
   if not valid['success']:
     logger.warning(f"CANCEL_HOUSE_FAILED | REASON={valid['log_message']}")
@@ -308,7 +345,10 @@ def search_house():
 
   houses = manager_obj.seek_houses(location, house_type, min_bedrooms,min_bathrooms, max_monthly_rent)
 
-  return render_template("features/houses.html", houses=houses, form_data={})
+  if not houses:
+    return render_template("features/houses.html", form_data=request.form, message="No House Found.", houses=[])
+
+  return render_template("features/houses.html", form_data={}, houses=houses)
 
 @app.route("/get-house", methods=["POST"])
 def get_house():
@@ -328,6 +368,7 @@ def get_house():
 
 @app.route("/update-house", methods=["GET", "POST"])
 @login_required
+@role_required("LANDLORD")
 def update_house():
   manager_obj = get_manager()
 
@@ -366,6 +407,8 @@ def update_house():
   return render_template("features/update_house.html", form_data={}, house=None)
 
 @app.route("/remove-house", methods=["POST"])
+@login_required
+@role_required("LANDLORD")
 def remove_house():
   manager_obj = get_manager()
   
