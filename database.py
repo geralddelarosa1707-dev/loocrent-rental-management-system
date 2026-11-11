@@ -109,19 +109,6 @@ class Database:
 
     return self.cursor.fetchone()
 
-  def get_user_by_id(self, user_id):
-    self.cursor.execute("""
-    SELECT user_id FROM Rentals
-    WHERE user_id = ?;
-    """, (user_id,))
-
-    row = self.cursor.fetchone()
-
-    if row is None:
-      return None
-
-    return row['user_id']
-
   def get_role(self, user_id):
     self.cursor.execute("""
     SELECT role FROM Users

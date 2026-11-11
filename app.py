@@ -246,6 +246,7 @@ def rental_history():
   return render_template("features/rental_history.html", rentals=rentals, form_data=form_data)
 
 @app.route("/return-rental", methods=["POST"])
+@login_required
 def return_rental():
   manager_obj = get_manager()
   
@@ -281,6 +282,7 @@ def return_rental():
   return redirect(url_for("rental_history"))
 
 @app.route("/cancel-rental", methods=["POST"])
+@login_required
 def cancel_rental():
   manager_obj = get_manager()
 
@@ -433,4 +435,4 @@ def remove_house():
   return redirect(url_for("home"))
   
 if __name__ == "__main__":
-  app.run(debug=True)
+  app.run(debug=False)

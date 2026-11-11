@@ -132,14 +132,12 @@ class Validation:
     
     if rented is None:
       return return_message(False, "Rental ID does not exist.", "RENTAL_ID_NOT_EXIST")
+
+    if rented['user_id'] != user_id:
+      return return_message(False, "You are not authorized to modify this rental.", "UNAUTHORIZED_RENTAL_ACCESS")
     
     if rented["status"] != "ACTIVE":
       return return_message(False, "Rental is already closed.", "HOUSE_NOT_ACTIVE")
-
-    user_id = self.db.get_user_by_id(user_id)
-
-    if user_id is None:
-      return return_message(False, "You haven't rented a house yet.", "USER_NOT_RENTED_A_HOUSE")
       
     return return_message(True, "", "")
     
