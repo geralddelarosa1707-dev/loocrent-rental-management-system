@@ -93,12 +93,10 @@ def login():
 
       return render_template("authentication/login.html", message=valid['message'], form_data=request.form)
 
-    usr_id = user['user_id']
+    user_id = user['user_id']
 
-    session['user_id'] = usr_id
+    session['user_id'] = user_id
     session.permanent = True
-    
-    manager_obj.register_landlord(usr_id)
 
     flash("Login successfully!", "success")
     return redirect(url_for("home"))
@@ -149,7 +147,11 @@ def apply_for_landlord():
 
 @app.route("/")
 def home():
-  return render_template("index.html")
+  manager_obj = get_manager()
+
+  houses = manager_obj.get_houses()
+  
+  return render_template("index.html", houses=houses)
 
 @app.route("/add-house", methods=["GET", "POST"])
 @login_required

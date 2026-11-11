@@ -20,6 +20,7 @@ class House:
   house_type: str
   date_added: str
   availability: str = "AVAILABLE", "RENTED", "NOT AVAILABLE"
+  image_filename: str
   
 @dataclass
 class Rental:

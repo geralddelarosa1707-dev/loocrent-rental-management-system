@@ -14,17 +14,13 @@ class Manager:
     self.validation = Validation(self.db)
 
   def get_user(self, email):
-    user = self.db.get_user_by_email(email)
-
-    return user
+    return self.db.get_user_by_email(email)
 
   def get_role_by_user_id(self, user_id):
-    usr_role = self.db.get_role(user_id)
+    return self.db.get_role(user_id)
 
-    return usr_role
-
-  def register_landlord(self, user_id):
-    self.db.assign_landlord(user_id)
+  def get_image_filename(self, house_id):
+    return self.db.get_img_filename(house_id)
 
   def signup_user(self, email, password):
     self.db.create_user(email, password)

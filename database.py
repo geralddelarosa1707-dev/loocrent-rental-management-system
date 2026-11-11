@@ -16,22 +16,6 @@ class Database:
     self.create_house_table()
     self.create_rental_table()
 
-  def assign_landlord(self, user_id):
-    self.cursor.execute("""
-    UPDATE Users SET role = ?
-    WHERE user_id = ?;
-    """, ("LANDLORD", user_id))
-
-    self.conn.commit()
-
-    self.cursor.execute("""
-    SELECT user_id, role
-    FROM Users
-    WHERE user_id = ?;
-    """, (user_id,))
-
-    updated_user = self.cursor.fetchone()
-
   def close(self):
     self.conn.close()
 
@@ -59,7 +43,8 @@ class Database:
     bathrooms INTEGER NOT NULL,
     house_type TEXT NOT NULL,
     date_added TEXT NOT NULL,
-    availability TEXT NOT NULL DEFAULT 'AVAILABLE'
+    availability TEXT NOT NULL DEFAULT 'AVAILABLE',
+    image_filename TEXT
     );
     """)
 
@@ -80,7 +65,7 @@ class Database:
     cancel_reason TEXT,
     
     FOREIGN KEY (house_id)
-    REFERENCES Houses(house_id)
+    REFERENCES Houses(house_id),
 
     FOREIGN KEY (user_id)
     REFERENCES Users(user_id)
@@ -150,6 +135,14 @@ class Database:
 
     return row['role']
 
+  def get_img_filename(self, house_id):
+    self.cursor.execute("""
+    SELECT image_filename FROM Houses
+    WHERE house_id = ?;
+    """, (house_id,))
+
+    return self.cursor.fetchone()
+
   def show_houses(self):
     self.cursor.execute("""
     SELECT * FROM Houses
@@ -202,9 +195,14 @@ class Database:
 
   def show_rentals(self, user_id):
     self.cursor.execute("""
-    SELECT * FROM Rentals
-    WHERE user_id = ?
-    ORDER BY rental_id ASC;
+    SELECT Rentals.*, Houses.house_name, Houses.image_filename 
+    FROM Rentals
+    
+    JOIN Houses
+    ON Rentals.house_id = Houses.house_id
+    
+    WHERE Rentals.user_id = ?
+    ORDER BY Rentals.rental_id ASC;
     """, (user_id,))
 
     return self.cursor.fetchall()

@@ -45,28 +45,38 @@
       </form>
       <section>
         {% if houses %}
-        <article class="post">
           {% for house in houses %}
-            <h4>{{ house['house_name'] }}</h4>
-            <details>
-              <summary>Show Details</summary>
-              <div>
-                <p>House ID: {{ house['house_id'] }}</p>
-                <p>Owner: {{ house['owner_name'] }}</p>
-                <p>Location: {{ house['house_address'] }}</p>
-                <p>Monthly Rent: ₱{{ house['monthly_rent'] }}</p>
-                <p>Bedrooms: {{ house['bedrooms'] }}</p>
-                <p>Bathrooms: {{ house['bathrooms'] }}</p>
-                <p>House Type: {{ house['house_type'] }}</p>
-                <p>Date Added: {{ house['date_added'] }}</p>
-                <p>Status: {{ house['availability'] }}</p>
-                <a href="{{ url_for('rent_house') }}" class="btn">Rent House</a>
+            <article class="house-card">
+              <div class="house-image-container">
+                {% if house['image_filename'] %}
+                  <img src="{{ url_for('static', filename='images/houses/' + house['image_filename']) }}" alt="{{ house['house_name'] }}" class="house-image">
+                {% else %}
+                  <div class="no-image">
+                    No image available
+                  </div>
+                {% endif %}
               </div>
-            </details>
+
+              <div class="house-info">
+                <h4>{{ house['house_name'] }}</h4>
+                <details>
+                  <summary>Show Details</summary>
+                  <div>
+                    <p>House ID: {{ house['house_id'] }}</p>
+                    <p>Owner: {{ house['owner_name'] }}</p>
+                    <p>Location: {{ house['house_address'] }}</p>
+                    <p>Monthly Rent: ₱{{ house['monthly_rent'] }}</p>
+                    <p>Bedrooms: {{ house['bedrooms'] }}</p>
+                    <p>Bathrooms: {{ house['bathrooms'] }}</p>
+                    <p>House Type: {{ house['house_type'] }}</p>
+                    <p>Date Added: {{ house['date_added'] }}</p>
+                    <p>Status: {{ house['availability'] }}</p>
+                    <a href="{{ url_for('rent_house') }}" class="btn">Rent House</a>
+                  </div>
+                </details>
+              </div>
+            </article>
           {% endfor %}
-        </article>
-        {% else %}
-          <p>No House Found.</p>
         {% endif %}
       </section>
     </main>

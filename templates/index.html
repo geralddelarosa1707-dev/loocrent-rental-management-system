@@ -38,7 +38,41 @@
         <p>Find affordable houses available for rent.</p>
         <a href="{{ url_for('houses') }}" class="btn">Browse Houses</a>
       </section>
-      <h3>Featured House</h3>
+      <h3>Featured Houses</h3>
+      
+      <section>
+        {% if houses %}
+          {% for house in houses %}
+            <article class="house-card">
+              <div class="house-image-container">
+                {% if house['image_filename'] %}
+                  <img src="{{ url_for('static', filename='images/houses/' + house['image_filename']) }}" alt="{{ house['house_name'] }}" class="house-image">
+                {% else %}
+                  <div class="no-image">
+                    No image available
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="house-info">
+                <h4>{{ house['house_name'] }}</h4>
+                <div>
+                  <p>House ID: {{ house['house_id'] }}</p>
+                  <p>Owner: {{ house['owner_name'] }}</p>
+                  <p>Location: {{ house['house_address'] }}</p>
+                  <p>Monthly Rent: ₱{{ house['monthly_rent'] }}</p>
+                  <p>Bedrooms: {{ house['bedrooms'] }}</p>
+                  <p>Bathrooms: {{ house['bathrooms'] }}</p>
+                  <p>House Type: {{ house['house_type'] }}</p>
+                  <p>Date Added: {{ house['date_added'] }}</p>
+                  <p>Status: {{ house['availability'] }}</p>
+                  <a href="{{ url_for('rent_house') }}" class="btn">Rent House</a>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% endif %}
+      </section>
     </main>
   </body>
 </html>

@@ -36,7 +36,7 @@
           <label for="house_address">House Address</label>
           <input type="text" id="house_address" name="house_address" value="{{ form_data.get('house_address', '') }}" placeholder="Enter House Address" required>
           <label for="monthly_rent">Monthly Rent</label>
-          <input type="number" id="monthly_rent" name="monthly_rent" value="{{ form_data.get('monthly_rent', '') }}" step="0.01" placeholder="Enter Monthly Rent" required>
+          <input type="number" id="monthly_rent" name="monthly_rent" value="{{ form_data.get('monthly_rent', '') }}" step="0.01" min="0" placeholder="Enter Monthly Rent" required>
           <label for="bedrooms">No. of Bedrooms</label>
           <input type="number" id="bedrooms" name="bedrooms" value="{{ form_data.get('bedrooms', '') }}" placeholder="Enter No. of Bedrooms" required>
           <label for="bathrooms">No. of Bathrooms</label>

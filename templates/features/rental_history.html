@@ -48,16 +48,28 @@
       </form>
 
       {% for rental in rentals %}
-        <div class="rental">
-          <p>Rental ID: {{ rental['rental_id'] }}</p>
-          <p>House ID: {{ rental['house_id'] }}</p>
-          <p>Renter Name: {{ rental['renter_name'] }}</p>
-          <p>Contact Number: {{ rental['contact_num'] }}</p>
-          <p>Date Rented: {{ rental['date_rented'] }}</p>
-          <p>Duration Months: {{ rental['duration_months'] }}</p>
-          <p>Status: {{ rental['status'] }}</p>
-          <p>Closed Date: {{ rental['closed_date'] }}</p>
-          <p>Cancel Reason: {{ rental['cancel_reason'] }}</p>
+        <div class="rental-card">
+          <div class="house-image-container">
+            {% if rental['image_filename'] %}
+              <img src="{{ url_for('static', filename='images/houses/' + rental['image_filename']) }}" alt="{{ rental['image_filename'] }}" class="house-image">
+            {% else %}
+              <div class="no-image">
+                No Image Available
+              </div>
+            {% endif%}
+          </div>
+          <div class="house-info">
+            <h4>{{ rental['house_name'] }}</h4>
+            <p>Rental ID: {{ rental['rental_id'] }}</p>
+            <p>House ID: {{ rental['house_id'] }}</p>
+            <p>Renter Name: {{ rental['renter_name'] }}</p>
+            <p>Contact Number: {{ rental['contact_num'] }}</p>
+            <p>Date Rented: {{ rental['date_rented'] }}</p>
+            <p>Duration Months: {{ rental['duration_months'] }}</p>
+            <p>Status: {{ rental['status'] }}</p>
+            <p>Closed Date: {{ rental['closed_date'] }}</p>
+            <p>Cancel Reason: {{ rental['cancel_reason'] }}</p>
+          </div>
         </div>
       {% endfor %}
     </main>
