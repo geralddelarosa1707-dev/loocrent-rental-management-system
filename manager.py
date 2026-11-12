@@ -25,8 +25,8 @@ class Manager:
   def signup_user(self, email, password):
     self.db.create_user(email, password)
     
-  def add_house(self, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added):
-    return self.db.insert_house(owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added)
+  def add_house(self, user_id, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added):
+    return self.db.insert_house(user_id, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added)
   
   def add_rent(self, house_id, user_id, renter_name, contact_num, date_rented, rental_duration):
     self.db.rent_house_status(house_id)
@@ -134,14 +134,14 @@ class Validation:
       return return_message(False, "Rental ID does not exist.", "RENTAL_ID_NOT_EXIST")
 
     if rented['user_id'] != user_id:
-      return return_message(False, "You are not authorized to modify this rental.", "UNAUTHORIZED_RENTAL_ACCESS")
+      return return_message(False, "You are not authorized to close this rental.", "UNAUTHORIZED_RENTAL_CLOSE")
     
     if rented["status"] != "ACTIVE":
       return return_message(False, "Rental is already closed.", "HOUSE_NOT_ACTIVE")
       
     return return_message(True, "", "")
     
-  def can_update_house(self, house_id, monthly_rent, bedrooms, bathrooms):
+  def can_update_house(self, house_id, user_id, monthly_rent, bedrooms, bathrooms):
     house = self.db.get_house_by_id(house_id)
     
     if house is None:
@@ -152,6 +152,9 @@ class Validation:
       
     if house["availability"] != "AVAILABLE":
       return return_message(False, "House is currently rented.", None)
+
+    if house['owner_user_id'] != user_id:
+      return return_message(False, "You are not authorized to modify this house.", "UNAUTHORIZED_HOUSE_MODIFY")
   
     if monthly_rent is not None and monthly_rent < 1:
       return return_message(False, "Monthly rent must be at least greater than 0", "INVALID_NUMBER_OF_RENT")
@@ -164,7 +167,7 @@ class Validation:
     
     return return_message(True, "", "")
     
-  def can_remove_house(self, house_id):
+  def can_remove_house(self, house_id, user_id):
     house = self.db.get_house_by_id(house_id)
     
     if house is None:
@@ -172,5 +175,8 @@ class Validation:
       
     if house["availability"] != "AVAILABLE":
       return return_message(False, "House is currently rented.", None)
+
+    if house['owner_user_id'] != user_id:
+      return return_message(False, "You are not authorized to remove this house.", "UNAUTHORIZED_HOUSE_REMOVE")
       
     return return_message(True, "", "")

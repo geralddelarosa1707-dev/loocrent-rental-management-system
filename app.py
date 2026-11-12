@@ -160,6 +160,8 @@ def add_house():
   manager_obj = get_manager()
   
   if request.method == "POST":
+    user_id = session['user_id']
+    
     owner_name = request.form.get('owner_name', "").strip().upper()
     house_name = request.form.get('house_name', "").strip().lower()
     house_address = request.form.get('house_address', "").strip().lower()
@@ -185,7 +187,7 @@ def add_house():
       logger.warning(f"ADD_HOUSE_FAILED | REASON={valid['log_message']}")
       return render_template("features/add_house.html", form_data=request.form, message=valid['message'])
               
-    house_id = manager_obj.add_house(owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added)
+    house_id = manager_obj.add_house(user_id, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added)
             
     logger.info("ADD_HOUSE_SUCCESS")
 
@@ -381,6 +383,8 @@ def update_house():
       house_id = int(request.form.get('house_id', "").strip())
     except ValueError:
       return render_template("features/update_house.html", message="Please enter a valid number.", form_data={}, house=None)
+
+    user_id = session['user_id']
           
     owner = request.form.get('owner', "").strip().upper()
     house_name = request.form.get('house_name', "").strip().lower()
@@ -395,7 +399,7 @@ def update_house():
           
     house_type = request.form.get('house_type', "").strip().lower()
           
-    valid = manager_obj.validation.can_update_house(house_id, monthly_rent, bedrooms, bathrooms)
+    valid = manager_obj.validation.can_update_house(house_id, user_id, monthly_rent, bedrooms, bathrooms)
           
     if not valid['success']:
       logger.warning(f"UPDATE_HOUSE_FAILED | REASON={valid['log_message']}")
@@ -420,8 +424,10 @@ def remove_house():
     house_id = int(request.form.get('house_id', "").strip())
   except ValueError:
     return render_template("features/update_house.html", message="Please enter a valid number.", form_data={}, house=None)
+
+  user_id = session['user_id']
           
-  valid = manager_obj.validation.can_remove_house(house_id)
+  valid = manager_obj.validation.can_remove_house(house_id, user_id)
         
   if not valid['success']:
     logger.warning(f"REMOVE_HOUSE_FAILED | REASON={valid['log_message']}")

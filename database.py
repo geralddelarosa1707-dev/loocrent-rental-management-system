@@ -35,6 +35,7 @@ class Database:
     self.cursor.execute("""
     CREATE TABLE IF NOT EXISTS Houses (
     house_id INTEGER PRIMARY KEY,
+    owner_user_id INTEGER NOT NULL,
     owner_name TEXT NOT NULL,
     house_name TEXT NOT NULL,
     house_address TEXT NOT NULL,
@@ -44,7 +45,10 @@ class Database:
     house_type TEXT NOT NULL,
     date_added TEXT NOT NULL,
     availability TEXT NOT NULL DEFAULT 'AVAILABLE',
-    image_filename TEXT
+    image_filename TEXT,
+    
+    FOREIGN KEY (owner_user_id)
+    REFERENCES Users(user_id)
     );
     """)
 
@@ -82,12 +86,12 @@ class Database:
 
     self.conn.commit()
 
-  def insert_house(self, owner, house, house_address, rent, bedrooms, bathrooms, house_type, date_added):
+  def insert_house(self, user_id, owner, house, house_address, rent, bedrooms, bathrooms, house_type, date_added):
     cursor = self.cursor.execute("""
-    INSERT INTO Houses (owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added
+    INSERT INTO Houses (user_id, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    """, (owner, house, house_address, rent, bedrooms, bathrooms, house_type, date_added))
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+    """, (user_id, owner, house, house_address, rent, bedrooms, bathrooms, house_type, date_added))
 
     self.conn.commit()
     

@@ -11,6 +11,7 @@ class User:
 @dataclass
 class House:
   house_id: Primary Key [int]
+  owner_user_id: int
   owner_name: str
   house_name: str
   house_address: str
