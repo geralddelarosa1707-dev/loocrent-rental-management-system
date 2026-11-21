@@ -31,6 +31,7 @@
       <form method="POST" action="{{ url_for('return_rental') }}" onsubmit="return confirm('Are you sure you want to return this rental?');">
         <fieldset>
           <legend>Return Rental</legend>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label for="rental_id">Rental ID</label>
           <input type="text" id="rental_id" name="rental_id" placeholder="Enter rental ID" required>
         </fieldset>
@@ -39,6 +40,7 @@
       <form method="POST" action="{{ url_for('cancel_rental') }}" onsubmit="return confirm('Are you sure you want to cancel this rental?');">
         <fieldset>
           <legend>Cancel Rental</legend>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label for="rental_id">Rental ID</label>
           <input type="text" id="rental_id" name="rental_id" value="{{ form_data.get('rental_id', '') }}" placeholder="Enter rental ID" required>
           <label for="cancel_reason">Cancel Reason</label>

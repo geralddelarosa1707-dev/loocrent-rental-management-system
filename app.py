@@ -4,6 +4,7 @@ from functools import wraps
 
 from dotenv import load_dotenv
 from flask import Flask, render_template, flash, redirect, url_for, request, g, session
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
 
 from database import Database
@@ -18,6 +19,8 @@ load_dotenv(env_path)
 
 app = Flask(__name__)
 
+csrf = CSRFProtect(app)
+
 secret_key = os.getenv("SECRET_KEY")
 
 if not secret_key:
@@ -25,6 +28,11 @@ if not secret_key:
 
 app.secret_key = secret_key
 app.permanent_session_lifetime = timedelta(days=3)
+app.config.update(
+  SESSION_COOKIE_SECURE=True,
+  SESSION_COOKIE_HTTPONLY=True,
+  SESSION_COOKIE_SAMESITE="Lax"
+)
 
 def get_manager():
   if "manager" not in g:
@@ -135,9 +143,11 @@ def create_user():
 
   return render_template("authentication/signup.html", form_data={})
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
   session.clear()
+
+  flash("You have been logged out.", "success")
 
   return redirect(url_for("login"))
 

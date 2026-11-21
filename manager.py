@@ -29,18 +29,30 @@ class Manager:
     return self.db.insert_house(user_id, owner_name, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type, date_added)
   
   def add_rent(self, house_id, user_id, renter_name, contact_num, date_rented, rental_duration):
-    self.db.rent_house_status(house_id)
-    
-    self.db.insert_rental(house_id, user_id, renter_name, contact_num, date_rented, rental_duration)
+    try:
+      self.db.insert_rental(house_id, user_id, renter_name, contact_num, date_rented, rental_duration)
+
+      self.db.rent_house_status(house_id)
+  
+      self.db.conn.commit()
+    except Exception:
+      self.db.conn.rollback()
+      raise
   
   def close_rental(self, rental_id, closed_date, action, cancel_reason):
-    rental = self.db.get_rental_by_id(rental_id)
-    
-    house_id = rental['house_id']
-    
-    self.db.update_rental_status(rental_id, closed_date, action, cancel_reason)
-    
-    self.db.avail_house_status(house_id)
+    try:
+      rental = self.db.get_rental_by_id(rental_id)
+      
+      house_id = rental['house_id']
+      
+      self.db.update_rental_status(rental_id, closed_date, action, cancel_reason)
+      
+      self.db.avail_house_status(house_id)
+
+      self.db.conn.commit()
+    except Exception:
+      self.db.conn.rollback()
+      raise
 
   def get_houses(self):
     return self.db.show_houses()
@@ -61,9 +73,15 @@ class Manager:
     self.db.update_house(house_id, owner, house_name, house_address, monthly_rent, bedrooms, bathrooms, house_type)
 
   def delete_house(self, house_id):
-    self.db.remove_house(house_id)
+    try:
+      self.db.remove_house(house_id)
+  
+      self.db.not_avail_house_status(house_id)
 
-    self.db.not_avail_house_status(house_id)
+      self.db.conn.commit()
+    except Exception:
+      self.db.conn.rollback()
+      raise
     
 class Validation:
   def __init__(self, db):

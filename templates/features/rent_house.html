@@ -29,6 +29,7 @@
       <form method="POST" action="{{ url_for('rent_house') }}">
         <fieldset>
           <legend><h4>Rental Information</h4></legend>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label for="house_id">House ID</label>
           <input type="text" id="house_id" name="house_id" value="{{ form_data.get('house_id', '') }}" placeholder="Enter house ID" required>
           <label for="renter_name">Renter Name</label>

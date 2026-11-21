@@ -29,6 +29,7 @@
       <form method="POST" action="{{ url_for('add_house') }}">
         <fieldset>
           <legend><h4>House Information</h4></legend>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label for="owner_name">Owner Name</label>
           <input type="text" id="owner_name" name="owner_name" value="{{ form_data.get('owner_name', '') }}" placeholder="Enter Owner Name" required>
           <label for="house_name">House Name</label>

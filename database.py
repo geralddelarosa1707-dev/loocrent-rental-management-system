@@ -103,11 +103,10 @@ class Database:
     VALUES (?, ?, ?, ?, ?, ?);
     """, (house_id, user_id, renter_name, contact_num, date_rented, duration_months))
 
-    self.conn.commit()
-
   def get_user_by_email(self, email):
     self.cursor.execute("""
-    SELECT * FROM Users
+    SELECT * 
+    FROM Users 
     WHERE email = ?;
     """, (email,))
 
@@ -115,7 +114,8 @@ class Database:
 
   def get_role(self, user_id):
     self.cursor.execute("""
-    SELECT role FROM Users
+    SELECT role 
+    FROM Users
     WHERE user_id = ?;
     """, (user_id,))
 
@@ -128,7 +128,8 @@ class Database:
 
   def get_img_filename(self, house_id):
     self.cursor.execute("""
-    SELECT image_filename FROM Houses
+    SELECT image_filename 
+    FROM Houses
     WHERE house_id = ?;
     """, (house_id,))
 
@@ -136,7 +137,8 @@ class Database:
 
   def show_houses(self):
     self.cursor.execute("""
-    SELECT * FROM Houses
+    SELECT * 
+    FROM Houses
     WHERE availability = 'AVAILABLE'
     ORDER BY house_id ASC;
     """)
@@ -145,7 +147,8 @@ class Database:
     
   def show_house(self, house_id):
     self.cursor.execute("""
-    SELECT * FROM Houses
+    SELECT * 
+    FROM Houses
     WHERE house_id = ?;
     """, (house_id,))
     
@@ -153,7 +156,8 @@ class Database:
     
   def search_houses(self, location=None, house_type=None, min_bedrooms=None, min_bathrooms=None, max_monthly_rent=None):
     query = """
-    SELECT * FROM Houses
+    SELECT * 
+    FROM Houses
     WHERE availability = 'AVAILABLE'
     """
     params = []
@@ -200,51 +204,51 @@ class Database:
     
   def get_house_by_id(self, house_id):
     return self.cursor.execute("""
-    SELECT * FROM Houses
+    SELECT * 
+    FROM Houses
     WHERE house_id = ?;
     """, (house_id,)).fetchone()
     
   def get_rental_by_id(self, rental_id):
     return self.cursor.execute("""
-    SELECT * FROM Rentals
+    SELECT * 
+    FROM Rentals
     WHERE rental_id = ?;
     """, (rental_id,)).fetchone()
 
   def rent_house_status(self, house_id):
     self.cursor.execute("""
-    UPDATE Houses SET availability = 'RENTED'
-    WHERE house_id = ?;
+    UPDATE Houses 
+    SET availability = 'RENTED'
+    WHERE house_id = ?
+    AND availability = 'AVAILABLE';
     """, (house_id,))
-
-    self.conn.commit()
     
   def avail_house_status(self, house_id):
     self.cursor.execute("""
-    UPDATE Houses SET availability = 'AVAILABLE'
+    UPDATE Houses 
+    SET availability = 'AVAILABLE'
     WHERE house_id = ?
     """, (house_id,))
-    
-    self.conn.commit()
     
   def not_avail_house_status(self, house_id):
     self.cursor.execute("""
-    UPDATE Houses SET availability = 'NOT AVAILABLE'
+    UPDATE Houses 
+    SET availability = 'NOT AVAILABLE'
     WHERE house_id = ?
     """, (house_id,))
-    
-    self.conn.commit()
 
   def update_rental_status(self, rental_id, closed_date, action, cancel_reason):
     self.cursor.execute("""
-    UPDATE Rentals SET closed_date = ?, status = ?, cancel_reason = ?
+    UPDATE Rentals 
+    SET closed_date = ?, status = ?, cancel_reason = ?
     WHERE rental_id = ?
     """, (closed_date, action, cancel_reason, rental_id))
     
-    self.conn.commit()
-    
   def update_house(self, house_id, owner=None, house_name=None, house_address=None, monthly_rent=None, bedrooms=None, bathrooms=None, house_type=None):
     query = """
-    UPDATE Houses SET
+    UPDATE Houses 
+    SET
     """
     
     fields = []
@@ -295,7 +299,8 @@ class Database:
     
   def remove_house(self, house_id):
     rental_history = self.cursor.execute("""
-    SELECT * FROM Rentals
+    SELECT * 
+    FROM Rentals
     WHERE house_id = ?;
     """, (house_id,)).fetchone()
     
@@ -306,5 +311,3 @@ class Database:
       DELETE FROM Houses
       WHERE house_id = ? AND availability = 'AVAILABLE'
       """, (house_id,))
-    
-      self.conn.commit()

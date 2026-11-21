@@ -30,6 +30,7 @@
       <form method="POST" action="{{ url_for('search_house') }}">
         <fieldset>
           <legend><h4>Search House</h4></legend>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label for="location">Location (optional)</label>
           <input type="text" id="location" name="location" placeholder="Enter location">
           <label for="house_type">House Type (optional)</label>

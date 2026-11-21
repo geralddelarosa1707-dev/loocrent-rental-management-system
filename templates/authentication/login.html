@@ -36,6 +36,7 @@
       <form method="POST" action="{{ url_for('login') }}">
         <fieldset>
           <legend>Login</legend>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label for="email">Email</label>
           <input type="email" id="email" name="email" value="{{ form_data.get('email', '') }}" placeholder="Enter your email" required>
           <label for="password">Password</label>
